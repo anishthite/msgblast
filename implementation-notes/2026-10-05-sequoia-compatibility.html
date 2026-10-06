@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sequoia compatibility</title>
+<meta name="task" content="Lower the app minimum macOS version to Sequoia.">
+<meta name="date-started" content="2026-10-05">
+<meta name="date-updated" content="2026-10-05">
+<meta name="status" content="ready-for-review">
+<meta name="blast-radius" content="low">
+<meta name="tags" content="macos,build,compatibility">
+<meta name="related" content="">
+<style>body{font:14px/1.45 -apple-system,system-ui,sans-serif;max-width:880px;margin:1.5rem auto;padding:0 1rem;color:#111}h1{font-size:20px;margin:0 0 .25rem}h2{font-size:15px;margin:1.4rem 0 .4rem;border-bottom:1px solid #ddd;padding-bottom:.2rem}table{border-collapse:collapse;width:100%;margin:.4rem 0 .8rem}th,td{border:1px solid #ddd;padding:4px 8px;text-align:left;vertical-align:top}th{background:#f6f6f6;font-weight:600}code{font-family:ui-monospace,Menlo,monospace;background:#f1f1f1;padding:1px 4px;border-radius:3px;font-size:12.5px}.meta{color:#555;font-size:12.5px;margin-bottom:.8rem}.kv{display:grid;grid-template-columns:140px 1fr;gap:2px 14px;font-size:13px;margin:.4rem 0 1rem}.kv b{color:#444;font-weight:600}.blast-low{color:#2a7a2a}</style>
+</head>
+<body>
+<h1>Sequoia compatibility</h1>
+<p class="meta"><code>fix/sequoia-compatibility</code> · worktree <code>/Users/anishthite/workspace/msgblast</code> · 2026-10-05 · status <b>ready-for-review</b> · blast <span class="blast-low">low</span></p>
+<h2>Summary</h2>
+<div class="kv"><b>Goal</b><div>Permit <code>msgblast.app</code> installation on macOS Sequoia.</div><b>Source</b><div><code>MACOSX_DEPLOYMENT_TARGET</code> and <code>LSMinimumSystemVersion</code> currently require <code>26.0</code>.</div><b>Surface</b><div>Build settings and application bundle metadata.</div><b>Schema</b><div>None.</div><b>Mobile</b><div>Untouched.</div><b>Open Qs</b><div>0.</div></div>
+<h2>Files</h2><table><tr><th>Path</th><th>Kind</th><th>Delta</th></tr><tr><td><code>scripts/generate_project.py</code></td><td>touch</td><td>Generate macOS 15 deployment settings.</td></tr><tr><td><code>msgblast/Info.plist</code></td><td>touch</td><td>Declare macOS 15 as the app minimum.</td></tr><tr><td><code>msgblast.xcodeproj/project.pbxproj</code></td><td>touch</td><td>Regenerate committed project settings.</td></tr><tr><td><code>msgblast/Windows/WindowCoordinator.swift</code></td><td>touch</td><td>Replace macOS 26-only composer glass view with its standard content view.</td></tr><tr><td><code>msgblast/Permissions/MessagesAccessGuide.swift</code></td><td>touch</td><td>Replace the macOS 26-only SwiftUI glass effect with regular material.</td></tr><tr><td><code>msgblast/Windows/AttachmentViews.swift</code> and <code>msgblast/Windows/Views.swift</code></td><td>touch</td><td>Replace remaining macOS 26-only SwiftUI glass effects with standard material backgrounds.</td></tr><tr><td><code>msgblast/Contacts/ContactSearch.swift</code></td><td>touch</td><td>Import Contacts as preconcurrency to retain its non-Sendable permission API under Swift 6.</td></tr></table>
+<h2>Decisions</h2><table><tr><th>ID</th><th>Choice · Rationale</th></tr><tr><td>D-001</td><td>Set <code>15.0</code>. macOS Sequoia identifies as version 15.</td></tr><tr><td>D-002</td><td>Replace macOS 26 glass APIs. They block compilation against the Sequoia SDK; regular content and material preserve the interaction.</td></tr><tr><td>D-003</td><td>Use <code>@preconcurrency</code> for Contacts. Its SDK concurrency annotation conflicts with the existing main-actor store and no app concurrency changes are required.</td></tr><tr><td>D-004</td><td>Replace both <code>.buttonStyle(.glass)</code> calls with <code>.bordered</code>. The unavailable style otherwise manifests as a four-minute Swift type-check timeout.</td></tr><tr><td>D-005</td><td>Use <code>@preconcurrency</code> for QuickLookThumbnailing. Its non-Sendable thumbnail result prevents the Sequoia SDK build.</td></tr></table>
+<h2>Assumptions</h2><ul><li>A-001 · The removed glass treatments are cosmetic; the existing controls and interactions remain unchanged.</li></ul>
+<h2>Reversibility</h2><p>R-001 · <span class="blast-low">low</span>. Restore <code>26.0</code> in the generator and plist, then regenerate the project.</p>
+<h2>Definition of done</h2><ul><li>Generated project and plist require <code>15.0</code>.</li><li>Release build succeeds in isolated derived data.</li><li>Built app metadata declares <code>15.0</code>.</li></ul>
+</body></html>
